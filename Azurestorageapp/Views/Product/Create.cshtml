@@ -1,0 +1,83 @@
+@model Azurestorageapp.Models.ProductViewModel
+@{ ViewData["Title"] = "Add Product"; }
+
+<h2>Add Product <small class="text-muted fs-6">(Table Storage + Blob Storage)</small></h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label fw-semibold">Product Name</label>
+                <input asp-for="Name" class="form-control" placeholder="e.g. Wireless Keyboard" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label fw-semibold">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Category" class="form-label fw-semibold">Category</label>
+                <select asp-for="Category" class="form-select">
+                    <option>Electronics</option>
+                    <option>Clothing</option>
+                    <option>Food & Beverages</option>
+                    <option>Home & Garden</option>
+                    <option>Sports</option>
+                    <option>General</option>
+                </select>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label asp-for="Price" class="form-label fw-semibold">Price (R)</label>
+                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="Price" class="text-danger small"></span>
+                </div>
+                <div class="col-6">
+                    <label asp-for="Quantity" class="form-label fw-semibold">Quantity</label>
+                    <input asp-for="Quantity" class="form-control" type="number" min="0" />
+                    <span asp-validation-for="Quantity" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ImageFile" class="form-label fw-semibold">
+                    Product Image <span class="text-muted fw-normal">(uploaded to Blob Storage)</span>
+                </label>
+                <input asp-for="ImageFile" class="form-control" type="file" accept="image/*" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save Product</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-5 offset-md-1">
+        <div class="card bg-light border-0">
+            <div class="card-body">
+                <h6>ℹ️ What happens when you save?</h6>
+                <ol class="small text-muted">
+                    <li>Image is uploaded to <strong>Azure Blob Storage</strong>.</li>
+                    <li>Product record is saved to <strong>Azure Table Storage</strong>.</li>
+                    <li>Two messages are sent to <strong>Azure Queue</strong>:
+                        <br/><code class="text-dark">[UPLOAD] Image uploaded: ...</code>
+                        <br/><code class="text-dark">[INVENTORY] Product: ... | NewQty: ...</code>
+                    </li>
+                    <li>A log entry is written to <strong>Azure File Share</strong>.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

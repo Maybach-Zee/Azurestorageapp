@@ -1,0 +1,62 @@
+@model List<string>
+@{ ViewData["Title"] = "Order Queue"; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Order Processing Queue <small class="text-muted fs-6">(Azure Queue Storage)</small></h2>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-7">
+        <div class="card bg-light border-0">
+            <div class="card-body small text-muted">
+                <strong>About Azure Queue Storage:</strong> This queue stores order processing and inventory
+                management messages. Messages are automatically sent whenever a product is created,
+                updated, or deleted, when an image is uploaded, and when a customer places an order.
+                Messages can be <em>peeked</em> (viewed without removing) or <em>dequeued</em> (consumed and removed).
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["DequeuedMessage"] != null)
+{
+    <div class="alert alert-success">
+        ✅ Dequeued: <strong>@TempData["DequeuedMessage"]</strong>
+    </div>
+}
+
+<h5>Messages in Queue <span class="badge bg-warning text-dark">@Model.Count shown (peek)</span></h5>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info mt-2">
+        Queue is empty. Create a product, place an order, or upload an image to populate the queue.
+    </div>
+}
+else
+{
+    <div class="list-group mb-4">
+        @foreach (var msg in Model)
+        {
+            var badgeClass = msg.StartsWith("[ORDER]") ? "bg-success" :
+                             msg.StartsWith("[INVENTORY]") ? "bg-primary" :
+                             msg.StartsWith("[UPLOAD]") ? "bg-info" :
+                             msg.StartsWith("[CUSTOMER]") ? "bg-secondary" : "bg-dark";
+            var label = msg.StartsWith("[ORDER]") ? "ORDER" :
+                        msg.StartsWith("[INVENTORY]") ? "INVENTORY" :
+                        msg.StartsWith("[UPLOAD]") ? "UPLOAD" :
+                        msg.StartsWith("[CUSTOMER]") ? "CUSTOMER" : "MSG";
+            <div class="list-group-item d-flex align-items-start gap-3 py-2">
+                <span class="badge @badgeClass mt-1">@label</span>
+                <code class="small text-dark">@msg</code>
+            </div>
+        }
+    </div>
+}
+
+<form asp-action="DequeueMessage" method="post">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-outline-danger">
+        Dequeue Next Message (removes from queue)
+    </button>
+</form>

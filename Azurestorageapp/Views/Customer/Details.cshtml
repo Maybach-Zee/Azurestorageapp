@@ -1,0 +1,175 @@
+@model Azurestorageapp.Models.CustomerEntity
+@{
+    ViewData["Title"] = "Customer Details";
+    var orders = ViewBag.Orders as List<Azurestorageapp.Models.OrderEntity> ?? new List<Azurestorageapp.Models.OrderEntity>();
+    double totalSpent = ViewBag.TotalSpent is double d ? d : 0.0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Customer Details</h2>
+    <a asp-action="PlaceOrder"
+       asp-route-partitionKey="@Model.PartitionKey"
+       asp-route-rowKey="@Model.RowKey"
+       class="btn btn-success">Place New Order</a>
+</div>
+<hr />
+
+@* Success / error banners from PlaceOrder redirect *@
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        ⚠️ @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-4">
+
+    @* ── Profile card ──────────────────────────────────────────────────── *@
+    <div class="col-md-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-success text-white fw-semibold">
+                 @Model.FullName
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0 small">
+                    <tr><th width="120">Customer ID</th><td><code>@Model.RowKey</code></td></tr>
+                    <tr><th>Email</th>      <td>@Model.Email</td></tr>
+                    <tr><th>Phone</th>      <td>@Model.Phone</td></tr>
+                    <tr><th>Address</th>    <td>@Model.Address</td></tr>
+                    <tr><th>City</th>       <td>@Model.City</td></tr>
+                    <tr>
+                        <th>Registered</th>
+                        <td class="text-muted">@Model.Timestamp?.ToString("yyyy-MM-dd HH:mm")</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card-footer bg-transparent d-flex gap-2">
+                <a asp-action="Edit"
+                   asp-route-partitionKey="@Model.PartitionKey"
+                   asp-route-rowKey="@Model.RowKey"
+                   class="btn btn-outline-warning btn-sm">Edit</a>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back</a>
+            </div>
+        </div>
+    </div>
+
+    @* ── Order summary stats ───────────────────────────────────────────── *@
+    <div class="col-md-7">
+        <div class="row g-3 mb-3">
+            <div class="col-4">
+                <div class="card text-center border-primary shadow-sm">
+                    <div class="card-body py-3">
+                        <div class="fs-3 fw-bold text-primary">@orders.Count</div>
+                        <div class="small text-muted">Total Orders</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card text-center border-success shadow-sm">
+                    <div class="card-body py-3">
+                        <div class="fs-3 fw-bold text-success">R @totalSpent.ToString("0.00")</div>
+                        <div class="small text-muted">Total Spent</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card text-center border-warning shadow-sm">
+                    <div class="card-body py-3">
+                        <div class="fs-3 fw-bold text-warning">
+                            @orders.Count(o => o.Status == "Processing")
+                        </div>
+                        <div class="small text-muted">Processing</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Most ordered product highlight *@
+        @if (orders.Any())
+        {
+            var top = orders
+            .GroupBy(o => o.ProductName)
+            .OrderByDescending(g => g.Sum(o => o.Quantity))
+            .First();
+            <div class="alert alert-light border small mb-0">
+                 Most ordered: <strong>@top.Key</strong>
+                — @top.Sum(o => o.Quantity) units across @top.Count() order(s)
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-light border small mb-0 text-muted">
+                No orders placed yet.
+            </div>
+        }
+    </div>
+</div>
+
+@* ── Order history ─────────────────────────────────────────────────────── *@
+<h5 class="mt-4 mb-2">Order History</h5>
+
+@if (!orders.Any())
+{
+    <div class="alert alert-info">
+        No orders yet for this customer.
+        <a asp-action="PlaceOrder"
+           asp-route-partitionKey="@Model.PartitionKey"
+           asp-route-rowKey="@Model.RowKey">Place the first order.</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Unit Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in orders)
+                {
+                    <tr>
+                        <td><code class="small">@o.OrderId</code></td>
+                        <td class="small text-muted text-nowrap">
+                            @o.OrderDate.ToString("yyyy-MM-dd HH:mm")
+                        </td>
+                        <td><strong>@o.ProductName</strong></td>
+                        <td><span class="badge bg-primary">@o.ProductCategory</span></td>
+                        <td>R @o.UnitPrice.ToString("0.00")</td>
+                        <td>@o.Quantity</td>
+                        <td><strong>R @o.TotalPrice.ToString("0.00")</strong></td>
+                        <td>
+                            <span class="badge @(o.Status == "Processing" ? "bg-warning text-dark" : "bg-success")">
+                                @o.Status
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="table-light fw-semibold">
+                <tr>
+                    <td colspan="5" class="text-end">Grand Total</td>
+                    <td>@orders.Sum(o => o.Quantity)</td>
+                    <td class="text-success">R @totalSpent.ToString("0.00")</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+}

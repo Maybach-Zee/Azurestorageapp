@@ -1,0 +1,137 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="text-center py-4">
+    <h1 class="display-5 fw-bold">☁️ ABC Retail — Azure Storage Solution</h1>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card text-center border-success shadow-sm">
+            <div class="card-body py-3">
+                <div class="display-6 fw-bold text-success">@ViewBag.CustomerCount</div>
+                <div class="text-muted small">Customers in Table Storage</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center border-primary shadow-sm">
+            <div class="card-body py-3">
+                <div class="display-6 fw-bold text-primary">@ViewBag.ProductCount</div>
+                <div class="text-muted small">Products in Table Storage</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center border-warning shadow-sm">
+            <div class="card-body py-3">
+                <div class="display-6 fw-bold text-warning">@ViewBag.QueueMessageCount</div>
+                <div class="text-muted small">Messages in Queue</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Service Cards -->
+<div class="row g-4">
+    <!-- Table Storage -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm border-success">
+            <div class="card-body text-center">
+                <div class="display-4 mb-2">📋</div>
+                <h5 class="card-title text-success">Table Storage</h5>
+                <p class="card-text text-muted small">
+                    Stores customer profiles and product information as NoSQL entities
+                    with PartitionKey and RowKey.
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 d-flex gap-2 justify-content-center">
+                <a asp-controller="Customer" asp-action="Index" class="btn btn-outline-success btn-sm">Customers</a>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-outline-success btn-sm">Products</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blob Storage -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm border-primary">
+            <div class="card-body text-center">
+                <div class="display-4 mb-2">🗂️</div>
+                <h5 class="card-title text-primary">Blob Storage</h5>
+                <p class="card-text text-muted small">
+                    Hosts product images and multimedia content.
+                    Images are served directly from public Azure Blob URLs.
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center">
+                <a asp-controller="Product" asp-action="Create" class="btn btn-outline-primary btn-sm">Upload Image</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Queue Storage -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm border-warning">
+            <div class="card-body text-center">
+                <div class="display-4 mb-2">📨</div>
+                <h5 class="card-title text-warning">Queue Storage</h5>
+                <p class="card-text text-muted small">
+                    Stores order processing and inventory management messages.
+                    Triggered on every create, update, delete, and order action.
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center">
+                <a asp-controller="Product" asp-action="QueueMessages" class="btn btn-outline-warning btn-sm">View Queue</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Share -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm border-info">
+            <div class="card-body text-center">
+                <div class="display-4 mb-2">📁</div>
+                <h5 class="card-title text-info">File Storage</h5>
+                <p class="card-text text-muted small">
+                    Stores log files for all operations. Auto-generated on every
+                    product create, update, delete, and order placement.
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center">
+                <a asp-controller="Product" asp-action="Files" class="btn btn-outline-info btn-sm">View Logs</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Architecture Summary -->
+<div class="mt-5 p-4 bg-light rounded border">
+    <h5 class="mb-3">Azure Architecture — ABC Retail</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <table class="table table-sm table-bordered mb-0">
+                <thead class="table-secondary">
+                    <tr><th>Azure Service</th><th>Used For</th><th>Resource Name</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>📋 Table Storage</td><td>Customer profiles &amp; product data</td><td><code>Customers</code>, <code>Products</code></td></tr>
+                    <tr><td>🗂️ Blob Storage</td><td>Product images</td><td><code>product-images</code></td></tr>
+                    <tr><td>📨 Queue Storage</td><td>Order &amp; inventory notifications</td><td><code>order-processing</code></td></tr>
+                    <tr><td>📁 File Share</td><td>Log files</td><td><code>abc-retail-files/logs</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <h6 class="text-muted">Queue Message Formats:</h6>
+            <ul class="small text-muted">
+                <li><code>[ORDER] OrderId: ABC123 | Customer: Zee | Product: Keyboard | Qty: 2 | Status: Processing</code></li>
+                <li><code>[INVENTORY] Product: Mouse | NewQty: 50 | Status: Updated</code></li>
+                <li><code>[UPLOAD] Image uploaded: product.jpg</code></li>
+                <li><code>[CUSTOMER] New customer: Zee Kang | Email: zee@abc.com</code></li>
+                <li><code>[INVENTORY] Product REMOVED: OldItem | ID: abc-123</code></li>
+            </ul>
+        </div>
+    </div>
+</div>

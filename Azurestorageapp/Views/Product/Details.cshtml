@@ -1,0 +1,69 @@
+@model Azurestorageapp.Models.ProductEntity
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<h2>Product Details</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded shadow" />
+            <p class="text-muted small mt-1">📦 Stored in Azure Blob Storage</p>
+        }
+        else
+        {
+            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height:200px;">
+                <span class="text-muted">No image</span>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-8">
+        <table class="table table-borderless">
+            <tr>
+                <th width="140">Name</th>
+                <td><strong>@Model.Name</strong></td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>@Model.Description</td>
+            </tr>
+            <tr>
+                <th>Price</th>
+                <td>R @Model.Price.ToString("0.00")</td>
+            </tr>
+            <tr>
+                <th>Quantity</th>
+                <td>@Model.Quantity</td>
+            </tr>
+            <tr>
+                <th>Product ID</th>
+                <td><code class="small">@Model.RowKey</code></td>
+            </tr>
+            <tr>
+                <th>Partition Key</th>
+                <td><code class="small">@Model.PartitionKey</code></td>
+            </tr>
+            <tr>
+                <th>Last Updated</th>
+                <td class="text-muted small">@Model.Timestamp?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+            </tr>
+        </table>
+
+        <div class="d-flex gap-2 mt-2">
+            <a asp-action="Edit"
+               asp-route-partitionKey="@Model.PartitionKey"
+               asp-route-rowKey="@Model.RowKey"
+               class="btn btn-outline-warning">Edit</a>
+            <a asp-action="Delete"
+               asp-route-partitionKey="@Model.PartitionKey"
+               asp-route-rowKey="@Model.RowKey"
+               class="btn btn-outline-danger">Delete</a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+        </div>
+    </div>
+</div>

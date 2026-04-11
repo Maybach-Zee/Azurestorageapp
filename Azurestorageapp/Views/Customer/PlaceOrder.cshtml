@@ -1,0 +1,184 @@
+@model List<Azurestorageapp.Models.ProductEntity>
+@{
+    ViewData["Title"] = "Place Order";
+    var customer = ViewBag.Customer as Azurestorageapp.Models.CustomerEntity;
+}
+
+<h2>Place Order <small class="text-muted fs-6">(Azure Queue + Table Storage)</small></h2>
+<hr />
+
+<div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+    <span class="fs-5">👤</span>
+    <div>
+        Ordering for: <strong>@customer!.FullName</strong>
+        <span class="text-muted ms-2">@customer.Email</span>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        ⚠️ @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">
+        No products with available stock.
+        <a asp-controller="Product" asp-action="Create">Add products first.</a>
+    </div>
+}
+else
+{
+    <form asp-action="PlaceOrder" method="post" id="orderForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="partitionKey" value="@customer.PartitionKey" />
+        <input type="hidden" name="rowKey" value="@customer.RowKey" />
+
+        @* Hidden field holds the selected productRowKey — set by JS, no "required" attribute *@
+        <input type="hidden" name="productRowKey" id="selectedProductRowKey" value="" />
+
+        <h5 class="mb-3">Select a Product</h5>
+        <p class="text-muted small mb-3">Click a product card to select it, then set the quantity below.</p>
+
+        <div class="row g-3 mb-4" id="productGrid">
+            @foreach (var p in Model)
+            {
+                <div class="col-md-4 col-lg-3">
+                    <div class="card h-100 border-2 product-card"
+                         style="cursor:pointer;"
+                         data-rowkey="@p.RowKey"
+                         data-max="@p.Quantity"
+                         data-name="@p.Name"
+                         onclick="selectProduct(this)">
+
+                        @if (!string.IsNullOrEmpty(p.ImageUrl))
+                        {
+                            <img src="@p.ImageUrl" class="card-img-top"
+                                 style="height:140px;object-fit:cover;" alt="@p.Name" />
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center"
+                                 style="height:140px;">
+                                <span class="text-muted">No image</span>
+                            </div>
+                        }
+
+                        <div class="card-body p-2">
+                            <div class="fw-semibold">@p.Name</div>
+                            <div class="small text-muted">@p.Category</div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <span class="text-primary fw-bold">R @p.Price.ToString("0.00")</span>
+                                <span class="badge @(p.Quantity <= 5 ? "bg-warning text-dark" : "bg-success")">
+                                    @p.Quantity in stock
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div id="selectionError" class="alert alert-danger d-none mb-3">
+            ⚠️ Please select a product before confirming.
+        </div>
+
+        <div class="row align-items-end g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                    Quantity
+                    <span id="selectedName" class="text-muted fw-normal small"></span>
+                </label>
+                <input name="quantity" id="qtyInput" type="number"
+                       class="form-control" value="1" min="1" max="999" required />
+                <div class="form-text" id="stockHint">Select a product first.</div>
+            </div>
+            <div class="col-md-3">
+                <button type="button" class="btn btn-success w-100" onclick="submitOrder()">
+                    Confirm Order
+                </button>
+            </div>
+            <div class="col-md-3">
+                <a asp-action="Details"
+                   asp-route-partitionKey="@customer.PartitionKey"
+                   asp-route-rowKey="@customer.RowKey"
+                   class="btn btn-outline-secondary w-100">Cancel</a>
+            </div>
+        </div>
+    </form>
+}
+
+<div class="mt-4 card bg-light border-0">
+    <div class="card-body small text-muted">
+        <strong>What happens when you confirm?</strong>
+        <ol class="mt-1 mb-0">
+            <li>Stock quantity is deducted in <strong>Azure Table Storage</strong>.</li>
+            <li>An <code>[ORDER]</code> message is sent to <strong>Azure Queue Storage</strong>.</li>
+            <li>An <code>[INVENTORY]</code> update message is also queued.</li>
+            <li>An order log is written to <strong>Azure File Share</strong>.</li>
+            <li>The order record is saved to the <strong>Orders</strong> table.</li>
+        </ol>
+    </div>
+</div>
+
+<style>
+    .product-card {
+        transition: border-color 0.15s, box-shadow 0.15s;
+        border-color: #dee2e6 !important;
+    }
+
+        .product-card.selected {
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 3px rgba(13,110,253,.25);
+        }
+
+        .product-card:hover {
+            border-color: #86b7fe !important;
+        }
+</style>
+
+@section Scripts {
+    <script>
+        function selectProduct(card) {
+            // Deselect all cards
+            document.querySelectorAll('.product-card').forEach(function(c) {
+                c.classList.remove('selected');
+            });
+
+            // Select clicked card
+            card.classList.add('selected');
+
+            var rowKey = card.dataset.rowkey;
+            var max    = parseInt(card.dataset.max);
+            var name   = card.dataset.name;
+
+            // Set hidden field value
+            document.getElementById('selectedProductRowKey').value = rowKey;
+
+            // Update quantity input
+            var qtyInput = document.getElementById('qtyInput');
+            qtyInput.max = max;
+            if (parseInt(qtyInput.value) > max) qtyInput.value = max;
+
+            // Update hints
+            document.getElementById('stockHint').textContent = 'Max available: ' + max + ' unit(s).';
+            document.getElementById('selectedName').textContent = ' — ' + name;
+
+            // Hide selection error if visible
+            document.getElementById('selectionError').classList.add('d-none');
+        }
+
+        function submitOrder() {
+            var selected = document.getElementById('selectedProductRowKey').value;
+            if (!selected) {
+                document.getElementById('selectionError').classList.remove('d-none');
+                document.getElementById('productGrid').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+            document.getElementById('orderForm').submit();
+        }
+    </script>
+}

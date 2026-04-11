@@ -1,0 +1,79 @@
+@model List<string>
+@{ ViewData["Title"] = "Log Files"; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Log Files <small class="text-muted fs-6">(Azure File Share Storage)</small></h2>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-7">
+        <div class="card bg-light border-0">
+            <div class="card-body small text-muted">
+                <strong>About Azure File Share:</strong> Log files are automatically created for every
+                product create, update, delete, and order placement. You can also manually upload any
+                file. All files are stored in the <code>abc-retail-files / logs</code> directory on Azure.
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white fw-semibold">Upload a File</div>
+            <div class="card-body">
+                <form asp-action="UploadFile" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-2">
+                        <input type="file" name="file" class="form-control form-control-sm" required />
+                    </div>
+                    <button type="submit" class="btn btn-info text-white btn-sm w-100">⬆️ Upload to File Share</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h5>Files in Azure File Share <span class="badge bg-info text-white">@Model.Count files</span></h5>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info mt-2">No files yet. Create a product or place an order to auto-generate log files.</div>
+}
+else
+{
+    <table class="table table-hover shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>File Name</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var file in Model)
+            {
+                var icon = file.StartsWith("order_") ? "🛒" :
+                           file.StartsWith("product_create") ? "➕" :
+                           file.StartsWith("product_update") ? "✏️" :
+                           file.StartsWith("product_delete") ? "🗑️" :
+                           file.StartsWith("customer_") ? "👤" : "📄";
+                var typeLabel = file.StartsWith("order_") ? "Order Log" :
+                                file.StartsWith("product_create") ? "Product Create" :
+                                file.StartsWith("product_update") ? "Product Update" :
+                                file.StartsWith("product_delete") ? "Product Delete" :
+                                file.StartsWith("customer_") ? "Customer Log" : "File";
+                <tr>
+                    <td>@icon <code class="small">@file</code></td>
+                    <td><span class="badge bg-secondary">@typeLabel</span></td>
+                    <td>
+                        <a asp-action="DownloadFile" asp-route-fileName="@file" class="btn btn-sm btn-outline-success">Download</a>
+                        <form asp-action="DeleteFile" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete @file?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="fileName" value="@file" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

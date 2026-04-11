@@ -1,0 +1,28 @@
+@model Azurestorageapp.Models.CustomerEntity
+@{ ViewData["Title"] = "Delete Customer"; }
+
+<h2 class="text-danger">Delete Customer</h2>
+<hr />
+
+<div class="alert alert-warning">
+    <strong>⚠️ Are you sure?</strong> This will permanently remove this customer profile from Azure Table Storage.
+</div>
+
+<div class="card shadow-sm" style="max-width:450px;">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-4">Name</dt><dd class="col-8">@Model.FullName</dd>
+            <dt class="col-4">Email</dt><dd class="col-8">@Model.Email</dd>
+            <dt class="col-4">Phone</dt><dd class="col-8">@Model.Phone</dd>
+            <dt class="col-4">City</dt><dd class="col-8">@Model.City</dd>
+        </dl>
+    </div>
+    <div class="card-footer bg-transparent">
+        <form asp-action="Delete" method="post">
+            <input type="hidden" name="partitionKey" value="@Model.PartitionKey" />
+            <input type="hidden" name="rowKey" value="@Model.RowKey" />
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>

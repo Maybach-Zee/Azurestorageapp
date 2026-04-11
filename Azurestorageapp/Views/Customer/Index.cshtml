@@ -1,0 +1,55 @@
+@model List<Azurestorageapp.Models.CustomerEntity>
+@{
+    ViewData["Title"] = "Customers";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>👥 Customer Profiles <small class="text-muted fs-6">(Azure Table Storage)</small></h2>
+    <a asp-action="Create" class="btn btn-success">+ Add Customer</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No customers yet. <a asp-action="Create">Add your first customer.</a></div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>City</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td><strong>@c.FullName</strong></td>
+                        <td>@c.Email</td>
+                        <td>@c.Phone</td>
+                        <td>@c.City</td>
+                        <td>
+                            <a asp-action="Details"
+                               asp-route-partitionKey="@c.PartitionKey"
+                               asp-route-rowKey="@c.RowKey"
+                               class="btn btn-sm btn-outline-info">View & Order</a>
+                            <a asp-action="Edit"
+                               asp-route-partitionKey="@c.PartitionKey"
+                               asp-route-rowKey="@c.RowKey"
+                               class="btn btn-sm btn-outline-warning">Edit</a>
+                            <a asp-action="Delete"
+                               asp-route-partitionKey="@c.PartitionKey"
+                               asp-route-rowKey="@c.RowKey"
+                               class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

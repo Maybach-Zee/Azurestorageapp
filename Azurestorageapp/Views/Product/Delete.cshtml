@@ -1,0 +1,91 @@
+@model Azurestorageapp.Models.ProductEntity
+@{
+    ViewData["Title"] = "Delete Product";
+    int orderCount = ViewBag.OrderCount is int c ? c : 0;
+    bool isBlocked = orderCount > 0;
+}
+
+<h2 class="@(isBlocked ? "text-secondary" : "text-danger")">Delete Product</h2>
+<hr />
+
+@if (isBlocked)
+{
+    <div class="alert alert-danger d-flex align-items-start gap-3">
+        <span class="fs-4 mt-1">🔒</span>
+        <div>
+            <strong>This product cannot be deleted.</strong><br />
+            <strong>@Model.Name</strong> is referenced in
+            <strong>@orderCount order@(orderCount == 1 ? "" : "s")</strong>.
+            Deleting it would remove order history for customers who have purchased it.
+            <br /><br />
+            You can still <strong>edit</strong> the product or set its quantity to 0 to take it off sale.
+        </div>
+    </div>
+
+    <div class="card shadow-sm" style="max-width:500px;">
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.Name"
+                     style="width:100px;height:100px;object-fit:cover;"
+                     class="rounded mb-3 opacity-50" />
+            }
+            <dl class="row mb-0">
+                <dt class="col-4">Name</dt>
+                <dd class="col-8">@Model.Name</dd>
+                <dt class="col-4">Category</dt>
+                <dd class="col-8">@Model.Category</dd>
+                <dt class="col-4">Price</dt>
+                <dd class="col-8">R @Model.Price.ToString("0.00")</dd>
+                <dt class="col-4">Orders</dt>
+                <dd class="col-8">
+                    <span class="badge bg-danger">@orderCount order(s) on record</span>
+                </dd>
+            </dl>
+        </div>
+        <div class="card-footer bg-transparent d-flex gap-2">
+            <a asp-action="Edit"
+               asp-route-partitionKey="@Model.PartitionKey"
+               asp-route-rowKey="@Model.RowKey"
+               class="btn btn-warning btn-sm">✏️ Edit Instead</a>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Back to Products</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <strong>⚠️ Are you sure you want to delete this product?</strong><br />
+        This will permanently remove the product from <strong>Azure Table Storage</strong>
+        and its image from <strong>Azure Blob Storage</strong>.
+    </div>
+
+    <div class="card shadow-sm" style="max-width:500px;">
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.Name"
+                     style="width:100px;height:100px;object-fit:cover;"
+                     class="rounded mb-3" />
+            }
+            <dl class="row mb-0">
+                <dt class="col-4">Name</dt>
+                <dd class="col-8">@Model.Name</dd>
+                <dt class="col-4">Description</dt>
+                <dd class="col-8">@Model.Description</dd>
+                <dt class="col-4">Price</dt>
+                <dd class="col-8">R @Model.Price.ToString("0.00")</dd>
+                <dt class="col-4">Quantity</dt>
+                <dd class="col-8">@Model.Quantity</dd>
+            </dl>
+        </div>
+        <div class="card-footer bg-transparent">
+            <form asp-action="Delete" method="post">
+                <input type="hidden" name="partitionKey" value="@Model.PartitionKey" />
+                <input type="hidden" name="rowKey" value="@Model.RowKey" />
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+}

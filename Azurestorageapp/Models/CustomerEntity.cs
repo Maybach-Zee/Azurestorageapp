@@ -28,6 +28,7 @@ namespace Azurestorageapp.Models
     public class CustomerViewModel
     {
         public string? RowKey { get; set; }
+        public string? PartitionKey { get; set; }
 
         [Required]
         public string FirstName { get; set; } = string.Empty;

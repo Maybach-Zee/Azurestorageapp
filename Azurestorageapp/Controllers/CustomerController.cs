@@ -86,6 +86,7 @@ namespace AzureStorageApp.Controllers
             if (c == null) return NotFound();
             return View(new CustomerViewModel
             {
+                PartitionKey = c.PartitionKey,
                 RowKey = c.RowKey,
                 FirstName = c.FirstName,
                 LastName = c.LastName,
@@ -97,9 +98,13 @@ namespace AzureStorageApp.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string partitionKey, string rowKey, CustomerViewModel model)
+        public async Task<IActionResult> Edit(CustomerViewModel model)
         {
             if (!ModelState.IsValid) return View("Edit", model);
+
+            // Keys come from hidden fields — no route params needed
+            var partitionKey = model.PartitionKey ?? "Customers";
+            var rowKey = model.RowKey ?? string.Empty;
 
             var customer = await _customerService.GetCustomerAsync(partitionKey, rowKey);
             if (customer == null) return NotFound();

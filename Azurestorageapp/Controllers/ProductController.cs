@@ -2,7 +2,7 @@
 using Azurestorageapp.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AzureStorageApp.Controllers
+namespace Azurestorageapp.Controllers
 {
     public class ProductController : Controller
     {
@@ -106,6 +106,7 @@ namespace AzureStorageApp.Controllers
 
             return View(new ProductViewModel
             {
+                PartitionKey = product.PartitionKey,
                 RowKey = product.RowKey,
                 Name = product.Name,
                 Description = product.Description,
@@ -118,9 +119,13 @@ namespace AzureStorageApp.Controllers
 
         // ── EDIT POST ─────────────────────────────────────────────────────
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string partitionKey, string rowKey, ProductViewModel model)
+        public async Task<IActionResult> Edit(ProductViewModel model)
         {
             if (!ModelState.IsValid) return View("Edit", model);
+
+            // Keys come from hidden fields in the form — no route params needed
+            var partitionKey = model.PartitionKey ?? "Products";
+            var rowKey = model.RowKey ?? string.Empty;
 
             var product = await _tableService.GetProductAsync(partitionKey, rowKey);
             if (product == null) return NotFound();

@@ -28,6 +28,7 @@ namespace Azurestorageapp.Models
     public class ProductViewModel
     {
         public string? RowKey { get; set; }
+        public string? PartitionKey { get; set; }
 
         [Required]
         public string Name { get; set; } = string.Empty;

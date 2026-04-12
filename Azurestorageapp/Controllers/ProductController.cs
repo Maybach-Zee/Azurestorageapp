@@ -64,7 +64,7 @@ namespace AzureStorageApp.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return View("Create", model);
 
             var product = new ProductEntity
             {
@@ -120,7 +120,7 @@ namespace AzureStorageApp.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string partitionKey, string rowKey, ProductViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return View("Edit", model);
 
             var product = await _tableService.GetProductAsync(partitionKey, rowKey);
             if (product == null) return NotFound();

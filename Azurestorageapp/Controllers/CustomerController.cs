@@ -54,7 +54,7 @@ namespace AzureStorageApp.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CustomerViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return View("Create", model);
 
             var customer = new CustomerEntity
             {
@@ -99,7 +99,7 @@ namespace AzureStorageApp.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string partitionKey, string rowKey, CustomerViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return View("Edit", model);
 
             var customer = await _customerService.GetCustomerAsync(partitionKey, rowKey);
             if (customer == null) return NotFound();

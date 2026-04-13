@@ -3,7 +3,7 @@
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 AzureStorageApp/
@@ -54,7 +54,7 @@ AzureStorageApp/
 
 ---
 
-## ☁️ STEP 1 — Create an Azure Storage Account
+## STEP 1 — Create an Azure Storage Account
 
 1. Go to https://portal.azure.com → Sign in.
 2. Click **"Create a resource"** → Search **"Storage account"** → Click **Create**.
@@ -68,7 +68,7 @@ AzureStorageApp/
 
 ---
 
-## 🔑 STEP 2 — Get Your Connection String
+## STEP 2 — Get Your Connection String
 
 1. In Azure Portal → go to your new Storage Account.
 2. Left sidebar → **Security + networking** → **Access keys**.
@@ -98,7 +98,7 @@ AzureStorageApp/
 
 ---
 
-## ▶️ STEP 4 — Run Locally
+## STEP 4 — Run Locally
 
 ### Option A — Visual Studio 2022
 1. Open `AzureStorageApp.csproj`.
@@ -118,45 +118,45 @@ Then open: `https://localhost:5001`
 
 ---
 
-## ✅ STEP 5 — Add Test Data (Required for Submission)
+## STEP 5 — Add Test Data (Required for Submission)
 
 You need at least **5 records** in each storage service for full marks.
 
-### 1. 👥 Table Storage — Customers
+### 1. Table Storage — Customers
 - Navbar → **Table Storage → Customers** → **+ Add Customer**
 - Add 5+ customers with full details
 - Verify: Azure Storage Explorer → Tables → **Customers**
 
-### 2. 📦 Table Storage — Products
+### 2. Table Storage — Products
 - Navbar → **Table Storage → Products** → **+ Add Product**
 - Add 5+ products, each with an image uploaded
 - Verify: Azure Storage Explorer → Tables → **Products**
 
-### 3. 🗂️ Blob Storage — Images
+### 3. Blob Storage — Images
 - Images are uploaded automatically when you create a product with an image
 - Verify: Navbar → **Blob (Images)** — shows image gallery
 - Also verify: Azure Storage Explorer → Blob Containers → **product-images**
 
-### 4. 📨 Queue Storage — Order Messages
+### 4. Queue Storage — Order Messages
 - Go to Customers → **View & Order** → **Place New Order** for 5+ orders
 - Each order sends `[ORDER]` and `[INVENTORY]` messages automatically
 - Verify: Navbar → **Queue** — shows all messages colour-coded
 - Also verify: Azure Storage Explorer → Queues → **order-processing**
 
-### 5. 📁 File Share — Log Files
+### 5. File Share — Log Files
 - Log files are auto-generated for every create, update, delete and order action
 - After adding products and placing orders, at least 5 log files will exist
 - Verify: Navbar → **File Share** — lists all log files with download option
 - Also verify: Azure Storage Explorer → File Shares → **abc-retail-files** → **logs**
 
-### 6. 📋 Table Storage — Orders
+### 6. Table Storage — Orders
 - Orders are saved automatically when a customer places an order
 - Verify: Azure Storage Explorer → Tables → **Orders**
 - Also visible: Customer → View & Order → **View** (Details page shows full order history)
 
 ---
 
-## 🚀 STEP 6 — Deploy to Azure App Service
+## STEP 6 — Deploy to Azure App Service
 
 ### Option A — Visual Studio 2022 (Recommended — easiest)
 
@@ -177,7 +177,7 @@ You need at least **5 records** in each storage service for full marks.
 
 ---
 
-## ⚙️ STEP 7 — Add Connection String to Azure App Service
+## STEP 7 — Add Connection String to Azure App Service
 
 The deployed app needs your storage connection string. Do this **immediately after publishing**:
 
@@ -214,7 +214,7 @@ The deployed app needs your storage connection string. Do this **immediately aft
 
 ---
 
-## 📝 Queue Message Formats
+## Queue Message Formats
 
 ```
 [ORDER]     OrderId: ABC123 | Customer: John Smith | Product: Keyboard | Qty: 2 | Status: Processing
@@ -226,7 +226,7 @@ The deployed app needs your storage connection string. Do this **immediately aft
 
 ---
 
-## 🔒 Key Business Rules
+## Key Business Rules
 
 - **Products with orders cannot be deleted** — the delete button is locked (🔒) on any product that has at least one order. This protects order history integrity.
 - **Customers can always be deleted** — customer records are independent.
@@ -236,7 +236,7 @@ The deployed app needs your storage connection string. Do this **immediately aft
 
 ---
 
-## 📌 NuGet Packages
+## NuGet Packages
 
 ```xml
 <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
@@ -248,7 +248,7 @@ The deployed app needs your storage connection string. Do this **immediately aft
 
 ---
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 | Problem | Fix |
 |---|---|
@@ -263,7 +263,7 @@ The deployed app needs your storage connection string. Do this **immediately aft
 
 ---
 
-## 📋 Submission Checklist
+## Submission Checklist
 
 - [ ] Student number in document filename and header
 - [ ] Module code: CLDV7112
